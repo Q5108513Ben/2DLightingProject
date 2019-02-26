@@ -25,6 +25,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Handler.hpp" />
+    <ClInclude Include="include\Setup.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\test_fs.glsl" />
+    <None Include="shaders\test_vs.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -3,7 +3,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>
 
-#include <glad/glad.h>
+#include "Setup.hpp"
 
 class Handler {
 
@@ -12,21 +12,23 @@ public:
 	Handler();
 	~Handler() {};
 
-	void HandleEvents();
-	void Render();
+	void handleEvents();
+	void render();
 
-	bool Running() { return isRunning; }
+	bool running() { return isRunning; }
 
 private:
 
 	sf::Window window;
 
-	void Initialise();
-	void Refresh(unsigned int width, unsigned int height);
-	void CleanUp();
-	void Quit();
+	void initialise();
+	void refresh(unsigned int width, unsigned int height);
+	void cleanUp();
+	void quit();
 
 	bool isRunning{ false };
+
+	GLuint test_shader;
 
 	GLuint test_vertex_buffer;
 

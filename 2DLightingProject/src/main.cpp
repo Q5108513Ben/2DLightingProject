@@ -4,10 +4,10 @@ int main() {
 
 	Handler program;
 
-	while (program.Running()) {
+	while (program.running()) {
 
-		program.HandleEvents();
-		program.Render();
+		program.handleEvents();
+		program.render();
 
 	}
 

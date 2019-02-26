@@ -29,5 +29,12 @@
     <ClInclude Include="include\Handler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Setup.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\test_fs.glsl" />
+    <None Include="shaders\test_vs.glsl" />
   </ItemGroup>
 </Project>

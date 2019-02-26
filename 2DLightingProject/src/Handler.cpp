@@ -1,7 +1,5 @@
 #include "Handler.hpp"
 
-#include <iostream>
-
 Handler::Handler() {
 
 	sf::ContextSettings settings;
@@ -30,11 +28,32 @@ Handler::Handler() {
 	// I have decided to use GLAD in order to load all of the OpenGL functions for me. This previous line gets GLAD to load the current OpenGL context.
 
 	isRunning = true;
-	Initialise();
+	initialise();
 
 }
 
-void Handler::Initialise() {
+void Handler::initialise() {
+
+	#pragma region Shader Setup
+
+	GLuint vertex_shader = setup::shader(GL_VERTEX_SHADER, "shaders/test_vs.glsl");
+	GLuint fragment_shader = setup::shader(GL_FRAGMENT_SHADER, "shaders/test_fs.glsl");
+
+	test_shader = glCreateProgram();
+
+	glAttachShader(test_shader, vertex_shader);
+	glAttachShader(test_shader, fragment_shader);
+
+	glLinkProgram(test_shader);
+
+	setup::checkLink(test_shader);
+	
+	glDeleteShader(vertex_shader);
+	glDeleteShader(fragment_shader);
+
+	#pragma endregion
+
+	#pragma region Vertex Buffer Setup
 
 	// Creating the vertex position data for a test triangle.
 	float vertices[] = {
@@ -45,18 +64,22 @@ void Handler::Initialise() {
 
 	// Creating vertex buffer 
 	glGenBuffers(1, &test_vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, test_vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	#pragma endregion
 
 	glClearColor(0.3f, 0.5f, 0.5f, 1.0f);
 
 }
 
-void Handler::Refresh(unsigned int width, unsigned int height) {
+void Handler::refresh(unsigned int width, unsigned int height) {
 
 	glViewport(0, 0, width, height);
 
 }
 
-void Handler::Render() {
+void Handler::render() {
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -64,26 +87,27 @@ void Handler::Render() {
 
 }
 
-void Handler::HandleEvents() {
+void Handler::handleEvents() {
 
 	sf::Event event;
 	while (window.pollEvent(event)) {
 
-		if (event.type == sf::Event::Closed) { Quit(); }
-		else if (event.type == sf::Event::Resized) { Refresh(event.size.width, event.size.height); }
+		if (event.type == sf::Event::Closed) { quit(); }
+		else if (event.type == sf::Event::Resized) { refresh(event.size.width, event.size.height); }
 
 	}
 }
 
-void Handler::CleanUp() {
+void Handler::cleanUp() {
 
-	// Will be used for deleting OpenGL stuff.
+	glDeleteShader(test_shader);
+	glDeleteBuffers(1, &test_vertex_buffer);
 
 }
 
-void Handler::Quit() {
+void Handler::quit() {
 
-	CleanUp();
+	cleanUp();
 	window.close();
 	isRunning = false;
 
