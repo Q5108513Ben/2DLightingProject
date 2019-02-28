@@ -30,6 +30,8 @@ private:
 
 	GLuint test_shader;
 
+	GLuint test_vertex_array;
 	GLuint test_vertex_buffer;
+	GLuint test_element_buffer;
 
 };

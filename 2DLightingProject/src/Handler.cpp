@@ -43,7 +43,6 @@ void Handler::initialise() {
 
 	glAttachShader(test_shader, vertex_shader);
 	glAttachShader(test_shader, fragment_shader);
-
 	glLinkProgram(test_shader);
 
 	setup::checkLink(test_shader);
@@ -57,19 +56,40 @@ void Handler::initialise() {
 
 	// Creating the vertex position data for a test triangle.
 	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
+		 0.5f,  0.5f, 0.0f,
 		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f
+		-0.5f, -0.5f, 0.0f,
+		-0.5f,  0.5f, 0.0f
 	};
+
+	unsigned int elements[] = {
+		0, 1, 3,
+		1, 2, 3
+	};
+
+
+	// Creating vertex array
+	glGenVertexArrays(1, &test_vertex_array);
+	glBindVertexArray(test_vertex_array);
 
 	// Creating vertex buffer 
 	glGenBuffers(1, &test_vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, test_vertex_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+	// Creating element buffer
+	glGenBuffers(1, &test_element_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, test_element_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+
+	// Setting vertex attribute pointers
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+	glEnableVertexAttribArray(0);
+
 	#pragma endregion
 
 	glClearColor(0.3f, 0.5f, 0.5f, 1.0f);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 }
 
@@ -82,6 +102,11 @@ void Handler::refresh(unsigned int width, unsigned int height) {
 void Handler::render() {
 
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	glUseProgram(test_shader);
+	glBindVertexArray(test_vertex_array);
+
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	window.display();
 
