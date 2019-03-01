@@ -54,19 +54,19 @@ void Handler::initialise() {
 
 	#pragma region Vertex Buffer Setup
 
-	// Creating the vertex position data for a test triangle.
-	float vertices[] = {
-		 0.5f,  0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f
+	// Creating the vertex position data for a full-screen quad
+	float vertex_data[] = {
+		// Positions			// Texture Coordinates
+		-1.0f,  1.0f, 0.0f,		0.0f, 0.0f,				// Top Left
+		 1.0f,  1.0f, 0.0f,  	1.0f, 0.0f,				// Top Right
+		-1.0f, -1.0f, 0.0f,		0.0f, 1.0f,				// Bottom Left
+		 1.0f, -1.0f, 0.0f,		1.0f, 1.0f				// Bottom Right
 	};
 
 	unsigned int elements[] = {
 		0, 1, 3,
-		1, 2, 3
+		0, 3, 2
 	};
-
 
 	// Creating vertex array
 	glGenVertexArrays(1, &test_vertex_array);
@@ -75,7 +75,7 @@ void Handler::initialise() {
 	// Creating vertex buffer 
 	glGenBuffers(1, &test_vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, test_vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 
 	// Creating element buffer
 	glGenBuffers(1, &test_element_buffer);
@@ -83,9 +83,32 @@ void Handler::initialise() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
 	// Setting vertex attribute pointers
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
-	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 3));
 
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	#pragma endregion
+
+	#pragma region Texture Loading
+
+	// This function loads an image through SFML's sf::Image class. It is then stored within a vector for later use.
+	loadImage("images/test_image.png");
+
+	// Generating and binding the previously created image.
+	glGenTextures(1, &test_image);
+	glBindTexture(GL_TEXTURE_2D, test_image);
+
+	// This sets the filter when the texture is magnified. 
+	// We will be using low resolution pixel art so we do not want OpenGL to attempt to smooth the texture as it is scaled up.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// Adding data to the OpenGL texture.
+	// This is retrieved from the SFML image we loaded in previously.
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_vector[0].getSize().x, image_vector[0].getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_vector[0].getPixelsPtr());
+	glGenerateMipmap(GL_TEXTURE_2D);
+	
 	#pragma endregion
 
 	glClearColor(0.3f, 0.5f, 0.5f, 1.0f);
@@ -104,6 +127,7 @@ void Handler::render() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(test_shader);
+	glBindTexture(GL_TEXTURE_2D, test_image);
 	glBindVertexArray(test_vertex_array);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -135,5 +159,16 @@ void Handler::quit() {
 	cleanUp();
 	window.close();
 	isRunning = false;
+
+}
+
+void Handler::loadImage(std::string file_location) {
+
+	sf::Image image;
+
+	if (image.loadFromFile(file_location)) {
+		image_vector.push_back(image);
+	}
+
 
 }

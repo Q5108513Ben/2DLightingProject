@@ -2,8 +2,12 @@
 
 out vec4 fragment_colour;
 
+in vec2 texture_coord;
+
+uniform sampler2D texture_data;
+
 void main() {
 	
-	fragment_colour = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+	fragment_colour = texture(texture_data, texture_coord);
 
 }
