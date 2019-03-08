@@ -36,16 +36,16 @@ void Handler::initialise() {
 
 	#pragma region Shader Setup
 
-	GLuint vertex_shader = setup::shader(GL_VERTEX_SHADER, "shaders/test_vs.glsl");
-	GLuint fragment_shader = setup::shader(GL_FRAGMENT_SHADER, "shaders/test_fs.glsl");
+	GLuint vertex_shader = setup::shader(GL_VERTEX_SHADER, "shaders/vertex_s.glsl");
+	GLuint fragment_shader = setup::shader(GL_FRAGMENT_SHADER, "shaders/fragment_s.glsl");
 
-	test_shader = glCreateProgram();
+	shader_program = glCreateProgram();
 
-	glAttachShader(test_shader, vertex_shader);
-	glAttachShader(test_shader, fragment_shader);
-	glLinkProgram(test_shader);
+	glAttachShader(shader_program, vertex_shader);
+	glAttachShader(shader_program, fragment_shader);
+	glLinkProgram(shader_program);
 
-	setup::checkLink(test_shader);
+	setup::checkLink(shader_program);
 	
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);
@@ -69,17 +69,17 @@ void Handler::initialise() {
 	};
 
 	// Creating vertex array
-	glGenVertexArrays(1, &test_vertex_array);
-	glBindVertexArray(test_vertex_array);
+	glGenVertexArrays(1, &vertex_array);
+	glBindVertexArray(vertex_array);
 
 	// Creating vertex buffer 
-	glGenBuffers(1, &test_vertex_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, test_vertex_buffer);
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 
 	// Creating element buffer
-	glGenBuffers(1, &test_element_buffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, test_element_buffer);
+	glGenBuffers(1, &element_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
 	// Setting vertex attribute pointers
@@ -94,19 +94,34 @@ void Handler::initialise() {
 	#pragma region Texture Loading
 
 	// This function loads an image through SFML's sf::Image class. It is then stored within a vector for later use.
-	loadImage("images/test_image.png");
+	loadImage("images/diffuse_texture.png");
+	loadImage("images/normal_texture.png");
+	loadImage("images/height_texture.png");
 
-	// Generating and binding the previously created image.
-	glGenTextures(1, &test_image);
-	glBindTexture(GL_TEXTURE_2D, test_image);
+	// Generating and binding the texture we will be using when rendering.
+	glGenTextures(1, &diffuse_texture);
+	glGenTextures(1, &normal_texture);
+	glGenTextures(1, &height_texture);
 
-	// This sets the filter when the texture is magnified. 
+	glBindTexture(GL_TEXTURE_2D, diffuse_texture);
+
+	// This sets the filter for when the texture is magnified. 
 	// We will be using low resolution pixel art so we do not want OpenGL to attempt to smooth the texture as it is scaled up.
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	// Adding data to the OpenGL texture.
 	// This is retrieved from the SFML image we loaded in previously.
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_vector[0].getSize().x, image_vector[0].getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_vector[0].getPixelsPtr());
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, normal_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_vector[1].getSize().x, image_vector[1].getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_vector[1].getPixelsPtr());
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, height_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_vector[2].getSize().x, image_vector[2].getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_vector[2].getPixelsPtr());
 	glGenerateMipmap(GL_TEXTURE_2D);
 	
 	#pragma endregion
@@ -126,9 +141,18 @@ void Handler::render() {
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glUseProgram(test_shader);
-	glBindTexture(GL_TEXTURE_2D, test_image);
-	glBindVertexArray(test_vertex_array);
+	glUseProgram(shader_program);
+	glBindVertexArray(vertex_array);
+
+	glBindTexture(GL_TEXTURE_2D, diffuse_texture);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, normal_texture);
+	glUniform1i(glGetUniformLocation(shader_program, "normal_map"), 1);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, height_texture);
+	glUniform1i(glGetUniformLocation(shader_program, "height_map"), 2);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -149,8 +173,9 @@ void Handler::handleEvents() {
 
 void Handler::cleanUp() {
 
-	glDeleteShader(test_shader);
-	glDeleteBuffers(1, &test_vertex_buffer);
+	glDeleteShader(shader_program);
+	glDeleteVertexArrays(1, &vertex_array);
+	glDeleteBuffers(1, &vertex_buffer);
 
 }
 

@@ -37,11 +37,11 @@ private:
 
 private:
 
-	GLuint test_shader;
+	GLuint shader_program;
 
-	GLuint test_vertex_array;
-	GLuint test_vertex_buffer;
-	GLuint test_element_buffer;
+	GLuint vertex_array;
+	GLuint vertex_buffer;
+	GLuint element_buffer;
 
 #pragma endregion
 
@@ -52,7 +52,9 @@ private:
 	void loadImage(std::string file_location);
 	std::vector<sf::Image> image_vector;
 
-	GLuint test_image;
+	GLuint diffuse_texture;
+	GLuint normal_texture;
+	GLuint height_texture;
 
 #pragma endregion
 

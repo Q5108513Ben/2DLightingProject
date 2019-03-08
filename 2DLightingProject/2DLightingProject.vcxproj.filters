@@ -34,7 +34,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\test_fs.glsl" />
-    <None Include="shaders\test_vs.glsl" />
+    <None Include="shaders\fragment_s.glsl" />
+    <None Include="shaders\vertex_s.glsl" />
   </ItemGroup>
 </Project>
