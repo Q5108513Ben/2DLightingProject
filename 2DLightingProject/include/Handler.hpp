@@ -8,6 +8,32 @@
 
 class Handler {
 
+#pragma region Structs
+
+private:
+
+	struct vec3 {
+		float r, g, b;
+		vec3(float x, float y, float z) : r(x), g(y), b(z) {};
+	};
+
+	struct vec2 {
+		float x, y;
+		vec2(float a, float b) : x(a), y(b) {};
+	};
+
+	struct LightData {
+
+		vec3 colour;
+		float intensity;
+		vec2 position;
+		float height;
+		float range;
+
+	};
+
+#pragma endregion
+
 #pragma region Framework
 
 public:
@@ -42,6 +68,7 @@ private:
 	GLuint vertex_array;
 	GLuint vertex_buffer;
 	GLuint element_buffer;
+	GLuint uniform_buffer;
 
 #pragma endregion
 

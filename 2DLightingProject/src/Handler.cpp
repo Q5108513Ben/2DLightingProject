@@ -91,6 +91,17 @@ void Handler::initialise() {
 
 	#pragma endregion
 
+	#pragma region Light Uniform Buffer Setup
+
+	glGenBuffers(1, &uniform_buffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(LightData), nullptr, GL_STREAM_DRAW);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniform_buffer);
+	glUniformBlockBinding(shader_program, glGetUniformBlockIndex(shader_program, "Light"), 0);
+
+	#pragma endregion
+
 	#pragma region Texture Loading
 
 	// This function loads an image through SFML's sf::Image class. It is then stored within a vector for later use.
@@ -144,6 +155,25 @@ void Handler::render() {
 	glUseProgram(shader_program);
 	glBindVertexArray(vertex_array);
 
+	#pragma region Sending Light Data
+
+	vec3 light_colour(0.3f, 0.5f, 0.5f);
+	float light_intensity = 10.f;
+	vec2 light_position(100, 150);
+	float light_height(140.f);
+	float light_range(50.f);
+
+	glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, 12, &light_colour);
+	glBufferSubData(GL_UNIFORM_BUFFER, 12, 16, &light_intensity);
+	glBufferSubData(GL_UNIFORM_BUFFER, 16, 24, &light_position);
+	glBufferSubData(GL_UNIFORM_BUFFER, 24, 28, &light_height);
+	glBufferSubData(GL_UNIFORM_BUFFER, 28, 32, &light_range);
+
+	#pragma endregion
+
+	#pragma region Sending Texture Data
+
 	glBindTexture(GL_TEXTURE_2D, diffuse_texture);
 
 	glActiveTexture(GL_TEXTURE1);
@@ -153,6 +183,8 @@ void Handler::render() {
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, height_texture);
 	glUniform1i(glGetUniformLocation(shader_program, "height_map"), 2);
+
+	#pragma endregion
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
