@@ -59,6 +59,15 @@ private:
 
 #pragma endregion
 
+#pragma region Controls
+
+private:
+
+	sf::Vector2i mouse_position;
+	float mouse_scroll{ 120.f };
+
+#pragma endregion
+
 #pragma region OpenGL Objects
 
 private:

@@ -119,21 +119,24 @@ void Handler::initialise() {
 	// This sets the filter for when the texture is magnified. 
 	// We will be using low resolution pixel art so we do not want OpenGL to attempt to smooth the texture as it is scaled up.
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 
 	// Adding data to the OpenGL texture.
 	// This is retrieved from the SFML image we loaded in previously.
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_vector[0].getSize().x, image_vector[0].getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_vector[0].getPixelsPtr());
-	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, normal_texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_vector[1].getSize().x, image_vector[1].getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_vector[1].getPixelsPtr());
-	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, height_texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_vector[2].getSize().x, image_vector[2].getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_vector[2].getPixelsPtr());
-	glGenerateMipmap(GL_TEXTURE_2D);
 	
 	#pragma endregion
 
@@ -157,18 +160,18 @@ void Handler::render() {
 
 	#pragma region Sending Light Data
 
-	vec3 light_colour(0.3f, 0.5f, 0.5f);
-	float light_intensity = 10.f;
-	vec2 light_position(100, 150);
+	vec3 light_colour(1.f, 1.f, 1.f);
+	float light_intensity(1.f);
+	vec2 light_position((float)mouse_position.x, (float)mouse_position.y);
 	float light_height(140.f);
-	float light_range(50.f);
+	float light_range(mouse_scroll);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, 12, &light_colour);
-	glBufferSubData(GL_UNIFORM_BUFFER, 12, 16, &light_intensity);
-	glBufferSubData(GL_UNIFORM_BUFFER, 16, 24, &light_position);
-	glBufferSubData(GL_UNIFORM_BUFFER, 24, 28, &light_height);
-	glBufferSubData(GL_UNIFORM_BUFFER, 28, 32, &light_range);
+	glBufferSubData(GL_UNIFORM_BUFFER, 12, 4, &light_intensity);
+	glBufferSubData(GL_UNIFORM_BUFFER, 16, 8, &light_position);
+	glBufferSubData(GL_UNIFORM_BUFFER, 24, 4, &light_height);
+	glBufferSubData(GL_UNIFORM_BUFFER, 28, 4, &light_range);
 
 	#pragma endregion
 
@@ -199,6 +202,17 @@ void Handler::handleEvents() {
 
 		if (event.type == sf::Event::Closed) { quit(); }
 		else if (event.type == sf::Event::Resized) { refresh(event.size.width, event.size.height); }
+		
+		else if (event.type == sf::Event::MouseMoved) { 
+			sf::Vector2i temp_position = sf::Mouse::getPosition();
+			mouse_position.x = temp_position.x - 240;
+			mouse_position.y = window.getSize().y - temp_position.y + 150;
+		}
+
+		else if (event.type == sf::Event::MouseWheelScrolled) {
+			mouse_scroll += event.mouseWheelScroll.delta * 18;
+			if (mouse_scroll < 0) { mouse_scroll = 0; }
+		}
 
 	}
 }

@@ -20,15 +20,31 @@ uniform sampler2D height_map;
 
 void main() {
 	
-	float ambient_light = 0.1f;
-
+	// Getting the texel data from our diffuse texture.
 	vec4 diffuse_texel  = texture(texture_data, texture_coord);
+		
+	// Calculating the distance in pixels between the light source and the 
+	// fragments position. This is used to determine if the fragment is 
+	// within range of the light.
+	vec2 distance_vector = light_position - gl_FragCoord.xy;
+	float distance_pixels = length(distance_vector);
 
-	fragment_colour = diffuse_texel * ambient_light;
-	
-	//fragment_colour = texture(normal_map, texture_coord);		// Tests to check that the shader was receiving the
-	//fragment_colour = texture(height_map, texture_coord);		// correct data from the sampler2D's.
-	//fragment_colour = vec4(light_colour, 1.f);				// Another test to check the Light data was being
-																// passed correctly.
+	if (distance_pixels < light_range) {
+
+		// If the fragment is within range of the light then we have to apply
+		// the lights colour. First we multiply the light colour with the 
+		// intensity scalar to find the final light colour to be applied.
+		vec3 final_light_colour = light_colour * light_intensity;
+		fragment_colour = diffuse_texel * vec4(final_light_colour, 1.f);
+
+	}
+	else {
+
+		// If the fragment is out of range of the light then we just output
+		// the ambient colour.
+		float ambient_light = 0.1f;
+		fragment_colour = diffuse_texel * ambient_light;
+
+	}
 
 }
