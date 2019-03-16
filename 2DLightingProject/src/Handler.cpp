@@ -163,7 +163,7 @@ void Handler::render() {
 	vec3 light_colour(1.f, 1.f, 1.f);
 	float light_intensity(1.f);
 	vec2 light_position((float)mouse_position.x, (float)mouse_position.y);
-	float light_height(140.f);
+	float light_height(mouse_height);
 	float light_range(mouse_scroll);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
@@ -212,6 +212,21 @@ void Handler::handleEvents() {
 		else if (event.type == sf::Event::MouseWheelScrolled) {
 			mouse_scroll += event.mouseWheelScroll.delta * 18;
 			if (mouse_scroll < 0) { mouse_scroll = 0; }
+		}
+
+		else if (event.type == sf::Event::KeyReleased) {
+
+			if (event.key.code == sf::Keyboard::Down) { 
+				mouse_height += 0.05f; 
+				if (mouse_height > 1.0f) { mouse_height = 1.0f; }
+
+			}
+			else if (event.key.code == sf::Keyboard::Up) {
+				mouse_height -= 0.05f;
+				if (mouse_height < 0.0f) { mouse_height = 0.0f; }
+
+			}
+
 		}
 
 	}

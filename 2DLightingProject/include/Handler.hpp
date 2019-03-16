@@ -65,6 +65,7 @@ private:
 
 	sf::Vector2i mouse_position;
 	float mouse_scroll{ 120.f };
+	float mouse_height{ 0.35f };
 
 #pragma endregion
 

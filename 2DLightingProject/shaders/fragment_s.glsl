@@ -31,11 +31,27 @@ void main() {
 
 	if (distance_pixels < light_range) {
 
-		// If the fragment is within range of the light then we have to apply
-		// the lights colour. First we multiply the light colour with the 
-		// intensity scalar to find the final light colour to be applied.
-		vec3 final_light_colour = light_colour * light_intensity;
-		fragment_colour = diffuse_texel * vec4(final_light_colour, 1.f);
+		// Getting the height data for the current pixel. Since the height map is
+		// in greyscale we only need to compare one value to the light_height float
+		vec4 height_texel = texture(height_map, texture_coord);
+
+		if (height_texel.x > light_height) {
+
+			// If the fragment is within range of the light then we have to apply
+			// the lights colour. First we multiply the light colour with the 
+			// intensity scalar to find the final light colour to be applied.
+			vec3 final_light_colour = light_colour * light_intensity;
+			fragment_colour = diffuse_texel * vec4(final_light_colour, 1.f);
+
+		}
+		else {
+
+			// If the fragment is higher than the light then we just output
+			// the ambient colour.
+			float ambient_light = 0.1f;
+			fragment_colour = diffuse_texel * ambient_light;
+
+		}
 
 	}
 	else {
