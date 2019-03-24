@@ -9,14 +9,14 @@ Handler::Handler() {
 	settings.majorVersion = 3;
 	settings.minorVersion = 3;			// These two lines set the version of OpenGL to be used. This sets it to version 3.3 which is the standard we have been using.
 	
-	window.create(sf::VideoMode(1440, 810), "Real-Time 2D Lighting Demo", sf::Style::Default, settings);
+	window.create(sf::VideoMode(1440, 810), "Real-Time 2D Lighting Demo", sf::Style::None, settings);
 
 	sf::ContextSettings applied_settings = window.getSettings();
 	std::cout << "Window Context Settings\n\n"
 		      << "         Depth Bits: " << applied_settings.depthBits << "\n"
 			  << "       Stencil Bits: " << applied_settings.stencilBits << "\n"
 			  << "Anti-Aliasing Level: " << applied_settings.antialiasingLevel << "\n"
-			  << "     OpenGL Version: " << applied_settings.majorVersion << "." << applied_settings.minorVersion << std::endl;
+			  << "     OpenGL Version: " << applied_settings.majorVersion << "." << applied_settings.minorVersion << "\n" << std::endl;
 
 	// The reason I am getting and outputting the context settings is to check for any changes. Different GPUs will allow for different settings and so if there is something there that
 	// the GPU doesn't like, SFML will automatically find the closest settings that are valid.
@@ -26,6 +26,9 @@ Handler::Handler() {
 	}
 
 	// I have decided to use GLAD in order to load all of the OpenGL functions for me. This previous line gets GLAD to load the current OpenGL context.
+
+	window.setMouseCursorVisible(false);
+	window.setMouseCursorGrabbed(true);
 
 	isRunning = true;
 	initialise();
@@ -145,12 +148,6 @@ void Handler::initialise() {
 
 }
 
-void Handler::refresh(unsigned int width, unsigned int height) {
-
-	glViewport(0, 0, width, height);
-
-}
-
 void Handler::render() {
 
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -160,18 +157,16 @@ void Handler::render() {
 
 	#pragma region Sending Light Data
 
-	vec3 light_colour(1.f, 1.f, 1.f);
-	float light_intensity(1.f);
+	vec3 light_colour(0.7f, 0.95f, 0.7f);
 	vec2 light_position((float)mouse_position.x, (float)mouse_position.y);
 	float light_height(mouse_height);
 	float light_range(mouse_scroll);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, 12, &light_colour);
-	glBufferSubData(GL_UNIFORM_BUFFER, 12, 4, &light_intensity);
+	glBufferSubData(GL_UNIFORM_BUFFER, 12, 4, &light_height);
 	glBufferSubData(GL_UNIFORM_BUFFER, 16, 8, &light_position);
-	glBufferSubData(GL_UNIFORM_BUFFER, 24, 4, &light_height);
-	glBufferSubData(GL_UNIFORM_BUFFER, 28, 4, &light_range);
+	glBufferSubData(GL_UNIFORM_BUFFER, 24, 4, &light_range);
 
 	#pragma endregion
 
@@ -199,11 +194,8 @@ void Handler::handleEvents() {
 
 	sf::Event event;
 	while (window.pollEvent(event)) {
-
-		if (event.type == sf::Event::Closed) { quit(); }
-		else if (event.type == sf::Event::Resized) { refresh(event.size.width, event.size.height); }
 		
-		else if (event.type == sf::Event::MouseMoved) { 
+		if (event.type == sf::Event::MouseMoved) { 
 			sf::Vector2i temp_position = sf::Mouse::getPosition();
 			mouse_position.x = temp_position.x - 240;
 			mouse_position.y = window.getSize().y - temp_position.y + 150;
@@ -216,15 +208,17 @@ void Handler::handleEvents() {
 
 		else if (event.type == sf::Event::KeyReleased) {
 
-			if (event.key.code == sf::Keyboard::Down) { 
-				mouse_height += 0.05f; 
-				if (mouse_height > 1.0f) { mouse_height = 1.0f; }
+			if (event.key.code == sf::Keyboard::Escape) { quit(); }
 
+			else if (event.key.code == sf::Keyboard::Up) { 
+				mouse_height += 3.0f; 
+				if (mouse_height > 30.0f) { mouse_height = 30.0f; }
+				std::cout << "Light height: " << mouse_height << std::endl;
 			}
-			else if (event.key.code == sf::Keyboard::Up) {
-				mouse_height -= 0.05f;
-				if (mouse_height < 0.0f) { mouse_height = 0.0f; }
-
+			else if (event.key.code == sf::Keyboard::Down) {
+				mouse_height -= 3.0f;
+				if (mouse_height < -30.0f) { mouse_height = -30.0f; }
+				std::cout << "Light height: " << mouse_height << std::endl;
 			}
 
 		}

@@ -25,9 +25,8 @@ private:
 	struct LightData {
 
 		vec3 colour;
-		float intensity;
-		vec2 position;
 		float height;
+		vec2 position;
 		float range;
 
 	};
@@ -51,7 +50,6 @@ private:
 	sf::Window window;
 
 	void initialise();
-	void refresh(unsigned int width, unsigned int height);
 	void cleanUp();
 	void quit();
 
@@ -65,7 +63,7 @@ private:
 
 	sf::Vector2i mouse_position;
 	float mouse_scroll{ 120.f };
-	float mouse_height{ 0.35f };
+	float mouse_height{ 0.0f };
 
 #pragma endregion
 
