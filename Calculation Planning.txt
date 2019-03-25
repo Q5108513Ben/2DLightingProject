@@ -11,6 +11,7 @@ The data we have:
 
 	
 	The y axis could represent the depth into the scene i.e. the z value.
+	If the object has a height this would have to be subtracted from the y value.
 	The y value would be replaced with the height value.
 	This would essentially convert our 2D positions into psuedo-3D positions.
 
@@ -19,7 +20,7 @@ The data we have:
 
 	We now have the direction of the light as well as the normal vector of the 
 	pixel we are shading. These two direction vectors can be used to calculate
-	the angle between them.
+	the cosine angle between them.
 
 	cos0 = (direction_vector . normal_vector) / (direction_vector_magnitude * normal_vector_magnitude)
 
@@ -28,20 +29,9 @@ The data we have:
 	- Multiply the two magnitudes.	
 	- Divide the dot product by the result.
 
-	This gives us cos0. This can be converted into an angle in radians via acos().
+	This gives us cos0. A value between -1 and 1 that represents the similarity between 
+	the two directions. Where 1 is an angle of 0, so the directions are the same; and 
+	-1 is an angle of 180, so the directions are opposite.
 
-	Now that we have calculated the angle between the two direction vectors we can figure out if 
-	the light should be effecting the pixel or not. If the angle is greater than 90 then the pixel 
-	is facing the opposite direction of the light and should be lit. If the angle is less than 90
-	then the pixel is facing in the same direction or perpendicular to the light and should not be 
-	lit.
 
-	I haven't tested this yet so it might not work. There is a chance that the angle calculated
-	is the acute angle between the directions which means that the closer to perpendicular they 
-	are the lower the angle. This means that that the directions could be almost opposite each other,
-	so they should be lit up, however the angle would be lower than 90 so they wouldn't get lit up.
-	
-	Scrap all this it won't work.
-
-	Instead we need to find the cosine similarity of the two vectors.
 	

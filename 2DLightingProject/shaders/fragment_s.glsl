@@ -46,8 +46,8 @@ void main() {
 	// component of a 2D position to find its position in a psuedo-3D 
 	// environment.
 
-	vec2 pixel_position_3D = vec2(gl_FragCoord.x, gl_FragCoord.y);
-	vec2 light_position_3D = vec2(light_position.x, light_position.y + light_height);
+	vec3 pixel_position_3D = vec3(gl_FragCoord.x, height_pixels, gl_FragCoord.y - height_pixels);
+	vec3 light_position_3D = vec3(light_position.x, light_height, light_position.y - light_height);
 
 	// e.g. 
 	// A light has a position of vec2(40, 60) and a height of vec3(230, 230, 230)
@@ -72,7 +72,7 @@ void main() {
 	// fragments position. This is used to determine if the fragment is 
 	// within range of the light.
 
-	vec2 direction_vector = light_position_3D - pixel_position_3D;
+	vec3 direction_vector = light_position_3D - pixel_position_3D;
 	vec2 distance_vector = light_position - gl_FragCoord.xy;
 	float distance_pixels = length(distance_vector);
 
@@ -88,7 +88,7 @@ void main() {
 		// Calculating L and N. The distance vector can be used as both
 		// distance and direction.
 
-		vec3 L = vec3(normalize(direction_vector), 1.0f);
+		vec3 L = normalize(direction_vector);
 		vec3 N = normalize(normal_texel.rgb);
 
 		// Calculates the strength of the light based on the angle it hits 
