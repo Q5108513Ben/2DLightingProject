@@ -109,7 +109,7 @@ void Handler::initialise() {
 
 	// This function loads an image through SFML's sf::Image class. It is then stored within a vector for later use.
 	loadImage("images/diffuse_texture.png");
-	loadImage("images/normal_texture.png");
+	loadImage("images/normal_texture_V2.png");
 	loadImage("images/height_texture.png");
 
 	// Generating and binding the texture we will be using when rendering.
@@ -198,7 +198,9 @@ void Handler::handleEvents() {
 		if (event.type == sf::Event::MouseMoved) { 
 			sf::Vector2i temp_position = sf::Mouse::getPosition();
 			mouse_position.x = temp_position.x - 240;
+			mouse_position.x -= mouse_position.x % 3;
 			mouse_position.y = window.getSize().y - temp_position.y + 150;
+			mouse_position.y -= mouse_position.y % 3;
 		}
 
 		else if (event.type == sf::Event::MouseWheelScrolled) {
@@ -212,12 +214,12 @@ void Handler::handleEvents() {
 
 			else if (event.key.code == sf::Keyboard::Up) { 
 				mouse_height += 3.0f; 
-				if (mouse_height > 60.0f) { mouse_height = 60.0f; }
+				//if (mouse_height > 60.0f) { mouse_height = 60.0f; }
 				std::cout << "Light height: " << mouse_height << std::endl;
 			}
 			else if (event.key.code == sf::Keyboard::Down) {
 				mouse_height -= 3.0f;
-				if (mouse_height < 0.0f) { mouse_height = 0.0f; }
+				//if (mouse_height < 0.0f) { mouse_height = 0.0f; }
 				std::cout << "Light height: " << mouse_height << std::endl;
 			}
 

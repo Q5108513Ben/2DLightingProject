@@ -23,11 +23,11 @@ float light_intensity = 0.2f;
 
 vec3 scale(vec3 unscaled_vector, int min_val, int max_val, int new_min, int new_max) {
 
-	// This function scales values from the range of 0 - 1 to -1 - 1
-	// It is used after retrieving the normal values from the normal map as
+	// This function scales values from one range to another.
+	// It is used after retrieving the height values from the height map as
 	// these are automatically scaled down from 0 - 255 to 0 - 1. However,
-	// in order to accurately represent a direction we need the minimum value
-	// to be -1.
+	// in order to calculate the height in pixels we need to scale it back
+	// to 0 - 255.
 
 	vec3 scaled_vector;
 
@@ -71,11 +71,18 @@ void main() {
 	// order to take into account the height value.
 
 	// NOTE: The current conversion also multiplies the final result by 3.
-	// This is because the pixel art is being scaled up 3x from its native
-	// resolution. Without this the results would appear incorrect as the light
-	// would always appear to be much lower than it should be.
+	//		 This is because the pixel art is being scaled up 3x from its native
+	//		 resolution. Without this the results would appear incorrect as the light
+	//		 would always appear to be much lower than it should be.
 
-	vec3 pixel_position_3D = vec3(gl_FragCoord.x, height_rounded, gl_FragCoord.y - height_rounded);
+	vec2 pixel_position = vec2(gl_FragCoord.xy);
+
+	pixel_position.x -= mod(round(gl_FragCoord.x), 3.0f);
+	pixel_position.y -= mod(round(gl_FragCoord.y), 3.0f);
+
+	// Rounding the fragments position to an integer to align with the pixels.
+
+	vec3 pixel_position_3D = vec3(pixel_position.x, height_rounded, pixel_position.y - height_rounded);
 	vec3 light_position_3D = vec3(light_position.x, light_height, light_position.y - light_height);
 
 	// Here we are trying to simulate a position in a 3D environment using our 
@@ -87,7 +94,7 @@ void main() {
 	// close to the screen, however its height causes it to end up towards the top
 	// of the screen. To do this we just subtract the height from the y position.
 
-	vec3 direction_vector = normalize(light_position_3D - pixel_position_3D);
+	vec3 L = light_position_3D - pixel_position_3D;
 	float distance_pixels = distance(light_position_3D, pixel_position_3D);
 
 	// Calculating the distance in pixels between the light source and the 
@@ -109,22 +116,16 @@ void main() {
 		// Getting normal value from our normal map.
 
 		vec4 normal_texel = texture(normal_map, texture_coord);
-		vec3 N = scale(normal_texel.rgb, 0, 1, -1, 1);
-		
+		vec3 N = vec3(normal_texel.r * 2 - 1, normal_texel.g * 2 - 1, normal_texel.b * 2 - 1);
+
+		//vec3 L = vec3(light_direction.x * 2 - 1, light_direction.y * 2 - 1, light_direction.z * 2 - 1);
+
 		// The normal RGB values are on a scale of 0 - 255. When returned from
 		// the texture() function they are automatically normalised into the 
 		// range of 0 - 1 since this is how OpenGL represents colours. The 
 		// issue with this is that a direction vector needs the ability to be
 		// negative to represent directions facing the opposite way so it needs
 		// to be on a scale of -1 to 1.
-
-		//vec3 L = scale(direction_vector, 0, 1, -1, 1);
-		vec3 L = direction_vector;
-
-
-
-		fragment_colour = vec4(N, 1.0f);
-		return;
 
 		// Calculating the cosine similarity. This equation takes the normalised
 		// direction vectors and returns a float from -1 to 1 that represents
@@ -133,7 +134,13 @@ void main() {
 		// opposite. This means that we can check if a pixel is facing the light
 		// if it has a cosine similarity lower than 0.
 
-		float cosine_similarity = dot(L, N);// / (length(L) * length(N));
+		float cosine_similarity = dot(L, N) / (length(L) * length(N));
+
+		// NOTE: This equation typically looks like this:
+		//		 dot(L, N) / length(L) * length(N)
+		//		 We can omit the second half of the equation since we are normalising
+		//		 the vectors so the length will always equal 1; and dividing by 1 does
+		//		 nothing so we can save ourselves the computation.
 	
 		if (cosine_similarity < 0) {
 
