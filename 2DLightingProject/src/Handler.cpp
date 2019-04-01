@@ -212,12 +212,12 @@ void Handler::handleEvents() {
 
 			else if (event.key.code == sf::Keyboard::Up) { 
 				mouse_height += 3.0f; 
-				if (mouse_height > 30.0f) { mouse_height = 30.0f; }
+				if (mouse_height > 60.0f) { mouse_height = 60.0f; }
 				std::cout << "Light height: " << mouse_height << std::endl;
 			}
 			else if (event.key.code == sf::Keyboard::Down) {
 				mouse_height -= 3.0f;
-				if (mouse_height < -30.0f) { mouse_height = -30.0f; }
+				if (mouse_height < 0.0f) { mouse_height = 0.0f; }
 				std::cout << "Light height: " << mouse_height << std::endl;
 			}
 
