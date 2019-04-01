@@ -87,19 +87,19 @@ void main() {
 	// close to the screen, however its height causes it to end up towards the top
 	// of the screen. To do this we just subtract the height from the y position.
 
+	vec3 direction_vector = normalize(light_position_3D - pixel_position_3D);
+	float distance_pixels = distance(light_position_3D, pixel_position_3D);
+
+	// Calculating the distance in pixels between the light source and the 
+	// fragments position. This is used to determine if the fragment is 
+	// within range of the light.
+
 
 	//----------------------------TEXTURE---------------------------\\
 
 	// Getting the texel data from our diffuse texture.
 
 	vec4 texture_texel = texture(texture_data, texture_coord);
-		
-	// Calculating the distance in pixels between the light source and the 
-	// fragments position. This is used to determine if the fragment is 
-	// within range of the light.
-
-	vec3 direction_vector = normalize(pixel_position_3D - light_position_3D);
-	float distance_pixels = distance(light_position_3D, pixel_position_3D);
 
 	if (distance_pixels < light_range) {
 
@@ -118,7 +118,13 @@ void main() {
 		// negative to represent directions facing the opposite way so it needs
 		// to be on a scale of -1 to 1.
 
-		vec3 L = scale(direction_vector, 0, 1, -1, 1);
+		//vec3 L = scale(direction_vector, 0, 1, -1, 1);
+		vec3 L = direction_vector;
+
+
+
+		fragment_colour = vec4(N, 1.0f);
+		return;
 
 		// Calculating the cosine similarity. This equation takes the normalised
 		// direction vectors and returns a float from -1 to 1 that represents
@@ -127,7 +133,7 @@ void main() {
 		// opposite. This means that we can check if a pixel is facing the light
 		// if it has a cosine similarity lower than 0.
 
-		float cosine_similarity = dot(L, N) / (length(L) * length(N));
+		float cosine_similarity = dot(L, N);// / (length(L) * length(N));
 	
 		if (cosine_similarity < 0) {
 
