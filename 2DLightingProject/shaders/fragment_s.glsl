@@ -80,7 +80,9 @@ void main() {
 	pixel_position.x -= mod(round(gl_FragCoord.x), 3.0f);
 	pixel_position.y -= mod(round(gl_FragCoord.y), 3.0f);
 
-	// Rounding the fragments position to an integer to align with the pixels.
+	// Rounding down the fragments position to an integer that is divisible by 3.
+	// This forces the fragments position to align with the imaginary pixel grid
+	// created by the pixel art.
 
 	vec3 pixel_position_3D = vec3(pixel_position.x, height_rounded, pixel_position.y - height_rounded);
 	vec3 light_position_3D = vec3(light_position.x, light_height, light_position.y - light_height);
@@ -97,6 +99,9 @@ void main() {
 	vec3 L = light_position_3D - pixel_position_3D;
 	float distance_pixels = distance(light_position_3D, pixel_position_3D);
 
+	// L represents the direction vector between the two points, this is needed
+	// to calculate the angle between the light and the normal vector.
+	//
 	// Calculating the distance in pixels between the light source and the 
 	// fragments position. This is used to determine if the fragment is 
 	// within range of the light.
@@ -104,7 +109,7 @@ void main() {
 
 	//----------------------------TEXTURE---------------------------\\
 
-	// Getting the texel data from our diffuse texture.
+	// Getting the texel data from our texture.
 
 	vec4 texture_texel = texture(texture_data, texture_coord);
 
@@ -118,14 +123,14 @@ void main() {
 		vec4 normal_texel = texture(normal_map, texture_coord);
 		vec3 N = vec3(normal_texel.r * 2 - 1, normal_texel.g * 2 - 1, normal_texel.b * 2 - 1);
 
-		//vec3 L = vec3(light_direction.x * 2 - 1, light_direction.y * 2 - 1, light_direction.z * 2 - 1);
-
 		// The normal RGB values are on a scale of 0 - 255. When returned from
 		// the texture() function they are automatically normalised into the 
 		// range of 0 - 1 since this is how OpenGL represents colours. The 
 		// issue with this is that a direction vector needs the ability to be
 		// negative to represent directions facing the opposite way so it needs
 		// to be on a scale of -1 to 1.
+
+		float cosine_similarity = dot(L, N) / (length(L) * length(N));
 
 		// Calculating the cosine similarity. This equation takes the normalised
 		// direction vectors and returns a float from -1 to 1 that represents
@@ -134,14 +139,6 @@ void main() {
 		// opposite. This means that we can check if a pixel is facing the light
 		// if it has a cosine similarity lower than 0.
 
-		float cosine_similarity = dot(L, N) / (length(L) * length(N));
-
-		// NOTE: This equation typically looks like this:
-		//		 dot(L, N) / length(L) * length(N)
-		//		 We can omit the second half of the equation since we are normalising
-		//		 the vectors so the length will always equal 1; and dividing by 1 does
-		//		 nothing so we can save ourselves the computation.
-	
 		if (cosine_similarity < 0) {
 
 			//--------------------------ATTENUATION--------------------------\\
